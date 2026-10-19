@@ -1,206 +1,200 @@
-================================================================================
-                    CS4048: DATA SCIENCE — ASSIGNMENT 2
-               EXPLORATORY DATA ANALYSIS OF REAL-WORLD DATASETS
-================================================================================
-Student Name: Muhammad Waqar Saleem
-Roll Number:  23L-1021
-Degree:       BS Computer Science (FAST NUCES Lahore)
-Repository:   https://github.com/muhammadwaqarsaleem/ds_eda-data_cleaning.git
-Release Tag:  v1.0
-Date:         October 18, 2026
-================================================================================
+# CS4048: Data Science — Assignment 2: Exploratory Data Analysis
 
---------------------------------------------------------------------------------
-1. DATASET PUBLICATION & REPRODUCIBILITY METADATA
---------------------------------------------------------------------------------
-- Cleaned Netflix Dataset:
-  * URL: https://github.com/muhammadwaqarsaleem/ds_eda-data_cleaning/23L_1021_A2_netflix_cleaned_v1.0.csv
-  * Version: v1.0 (Tagged Release)
-  * Base Source: Kaggle (shivamb/netflix-shows; 8,807 rows, 12 columns)
-- Cleaned Supermarket Sales Dataset:
-  * URL: https://github.com/muhammadwaqarsaleem/ds_eda-data_cleaning/23L_1021_A2_supermarket_cleaned_v1.0.csv
-  * Version: v1.0 (Tagged Release)
-  * Base Source: Course Instructor (supermarket_Sales.csv; 1,000 rows, 17 columns)
+This repository hosts the Exploratory Data Analysis (EDA), data cleaning pipelines, and published dataset artifacts for **CS4048: Data Science (Assignment 2)** at **FAST NUCES, Lahore Campus**[cite: 1, 2]. The analysis rigorously follows the required hypothesis-driven workflow:
+
+$$\text{Question} \longrightarrow \text{Analysis} \longrightarrow \text{Visualization / Statistic} \longrightarrow \text{Observation} \longrightarrow \text{Interpretation}$$
 
 
-================================================================================
-PART A: NETFLIX MOVIES & TV SHOWS EDA
-================================================================================
+[cite: 1]
 
---------------------------------------------------------------------------------
-A1. OVERVIEW & UNIT OF OBSERVATION
---------------------------------------------------------------------------------
-The Netflix dataset contains metadata for 8,807 entertainment titles cataloged 
-on the platform up to mid-2021. A single row represents an individual, cataloged 
-media asset (either a standalone Movie or an episodic TV Show season bundle), 
-characterized by creative credits, geographic production origin, parental 
-guidance maturity rating, release year, addition date, and category tags.
+---
 
---------------------------------------------------------------------------------
-A2 & A3. DATA QUALITY & CLEANING SUMMARY TABLE
---------------------------------------------------------------------------------
-| Problem Identified        | Detection Evidence           | Decision Taken            | Analytical Justification                       |
-|---------------------------|------------------------------|---------------------------|------------------------------------------------|
-| Schema Shift / Alignment  | 3 rows with rating values    | Corrected shift: moved    | Eliminates invalid rating classes and restores |
-| in Duration & Rating      | '74 min', '84 min', '66 min' | duration strings to       | duration numeric parsing without row loss.     |
-|                           | (Louis C.K. stand-up titles) | duration; marked rating   |                                                |
-|                           |                              | as 'Unavailable'.         |                                                |
-| Missing Values in Text    | director (2,634 nulls),      | Imputed explicit category | Preserves 30%+ of the dataset for multi-genre  |
-| & Categorical Attributes  | cast (825 nulls),            | string 'Unknown';         | and geographic analyses without introducing     |
-|                           | country (831 nulls)          | avoided row drops.        | artificial imputation bias.                    |
-| Missing Maturity Ratings  | rating (4 nulls post-fix)    | Imputed 'Unavailable'.    | Prevents discarding titles with valid metadata. |
-| Missing Platform Dates    | date_added (10 nulls)        | Imputed median date added | Retains records; minimal impact on macro-level |
-|                           |                              | by release-year cohort.   | chronological volume trend analyses.           |
-| Unparsed Temporal String  | date_added stored as object  | Converted to datetime64;  | Enables temporal sorting, aggregation, and     |
-|                           | strings (e.g., 'Sep 9, 2021')| extracted year_added and  | catalog acquisition lag calculations.          |
-|                           |                              | month_added.              |                                                |
-| Composite Duration Field  | duration mixed 'X min' and   | Parsed into duration_int  | Separates discrete season counts from          |
-|                           | 'Y Season(s)' text strings   | and duration_unit flag    | continuous movie running times for EDA.        |
-| Multi-Valued Attributes   | country and listed_in        | Split on comma delimiters;| Prevents string-aggregation artifacts; allows  |
-|                           | contained comma-separated    | engineered country_count  | true per-entity marginal frequency counts.     |
-|                           | lists                        | and genre_count features. |                                                |
+## 📌 Metadata & Student Information
 
-Cleaned output exported as: 23L_1021_A2_netflix_cleaned_v1.0.csv (8,807 rows, 20 columns).
+* **Student Name:** Muhammad Waqar Saleem
+* **Roll Number:** 23L-1021
+* **Degree Program:** BS Computer Science (7th Semester)[cite: 1]
+* **Institution:** FAST School of Computing, FAST-NUCES Lahore[cite: 1]
+* **Repository:** [`muhammadwaqarsaleem/ds_eda-data_cleaning`](https://github.com/muhammadwaqarsaleem/ds_eda-data_cleaning.git)
+* **Release Version:** `v1.0`[cite: 6]
+* **Date:** October 18, 2026[cite: 1]
 
---------------------------------------------------------------------------------
-A8. NETFLIX INSIGHTS & INTERPRETATIONS
---------------------------------------------------------------------------------
-1. Catalog Dominance and Expansion Shift:
-   - Observation: Movies comprise 69.62% of the historical catalog (6,131 titles) 
-     versus 30.38% for TV Shows (2,676 titles). However, the share of TV Shows added 
-     accelerated from 19.8% in 2015 to 35.4% of all additions in 2020.
-   - Interpretation: Netflix began as a film-licensing clearinghouse but pivoted 
-     toward episodic series to drive subscriber retention and lifetime value.
-   - Speculation: Episodic content fosters multi-week platform engagement and 
-     reduces monthly subscriber churn compared to single-view feature films.
+---
 
-2. Catalog Ingestion Delay (Catalog Lag Dynamics):
-   - Observation: The median delay between theatrical release and platform addition 
-     dropped from 4.0 years for pre-2015 titles to 0.0 years (same-year release) by 
-     2018–2021; 58.4% of content added after 2018 was under 12 months old.
-   - Interpretation: Netflix shifted aggressively from archival library licensing 
-     to direct Day-and-Date global streaming distributions and Original productions.
-   - Speculation: Studio licensing windows tightened as legacy media conglomerates 
-     launched competing platforms (Disney+, HBO Max), forcing proprietary output.
+## 📦 Published Datasets & Versioning (Reproducibility)
 
-3. Geographic Production Hub Specialization:
-   - Observation: The United States produces the highest volume (3,690 titles), 
-     followed by India (1,046 titles) and the United Kingdom (806 titles). Genre 
-     profiles diverge sharply: 54.2% of Indian titles belong to 'Dramas' and 
-     'International Movies', whereas US output shows high diversification across 
-     'Comedies' (28.4%), 'Documentaries' (21.3%), and 'Action' (18.1%).
-   - Interpretation: Production ecosystems reflect domestic market structures; 
-     India’s catalog mirrors Bollywood feature dominance, whereas Western hubs 
-     balance scripted episodic series with documentary journalism.
-   - Speculation: Regulatory content quotas and local market viewing habits drive 
-     tailored genre commissioning across regional production subsidiaries.
+In compliance with the assignment specification, both cleaned datasets have been versioned and published for direct reuse in **Assignment 3 (Feature Selection & Dimensionality Reduction)**[cite: 1, 6]:
 
-4. Bimodal Concentration in Content Maturity Ratings:
-   - Observation: TV-MA (3,207 titles; 36.4%) and TV-14 (2,160 titles; 24.5%) account 
-     for 60.9% of the entire catalog. Family-oriented content (TV-Y, TV-G, G) 
-     represents less than 11.5% of total catalog assets.
-   - Interpretation: Netflix’s core library targets mature adult and adolescent 
-     demographics, distinguishing itself from family-centric streaming competitors.
-   - Speculation: Adults hold individual payment authority for streaming accounts, 
-     incentivizing platforms to prioritize mature, prestige drama acquisitions.
+| Dataset | Raw Source | Cleaned CSV Artifact | Version | Schema Dimensions |
+| --- | --- | --- | --- | --- |
+| **Netflix Movies & TV Shows** | [Kaggle (`shivamb/netflix-shows`)](https://www.kaggle.com/datasets/shivamb/netflix-shows)[cite: 2] | [`23L_1021_A2_netflix_cleaned_v1.0.csv`](https://www.google.com/search?q=https://github.com/muhammadwaqarsaleem/ds_eda-data_cleaning/blob/v1.0/23L_1021_A2_netflix_cleaned_v1.0.csv) | `v1.0`[cite: 6] | 8,807 rows × 20 cols[cite: 2] |
+| **Supermarket Sales** | Course Instructor (`supermarket_Sales.csv`)[cite: 2] | [`23L_1021_A2_supermarket_cleaned_v1.0.csv`](https://www.google.com/search?q=https://github.com/muhammadwaqarsaleem/ds_eda-data_cleaning/blob/v1.0/23L_1021_A2_supermarket_cleaned_v1.0.csv) | `v1.0`[cite: 6] | 1,000 rows × 25 cols[cite: 2] |
 
-5. Duration Uniformity and Limited Episodic Lifespans:
-   - Observation: Movie running times follow an approximately normal distribution 
-     centered at Mean = 99.58 minutes (Median = 98.0 min, IQR = 26.0 min). TV Shows 
-     exhibit extreme right-skew: 67.0% conclude after Season 1, and 83.8% end by 
-     Season 2; fewer than 2.4% reach 5 or more seasons.
-   - Interpretation: Feature films adhere to rigid industry exhibition standards 
-     (90–120 minutes). In contrast, streaming episodic series face steep renewal 
-     hurdles, with platforms canceling shows early if viewership drops post-Season 1.
-   - Speculation: Escalating actor contracts and diminishing returns on new subscriber 
-     acquisition beyond Season 2 disincentivize long multi-season commitments.
+---
 
-================================================================================
-PART B: SUPERMARKET SALES EDA
-================================================================================
+## 📂 Repository Structure
 
---------------------------------------------------------------------------------
-B1. OVERVIEW & UNIT OF OBSERVATION
---------------------------------------------------------------------------------
-The Supermarket Sales dataset comprises 1,000 retail transaction records logged 
-across three metropolitan supermarket branches in Myanmar (Yangon, Naypyitaw, 
-Mandalay) over a three-month operational quarter (Jan 1, 2019 – Mar 30, 2019). 
-A single row represents a distinct point-of-sale (POS) checkout transaction invoice, 
-recording item category, unit price, quantity, tax, total spend, customer tier, 
-tender type, date-time, and satisfaction rating.
+```text
+├── data/
+│   ├── netflix_titles.csv                       # Raw Kaggle Netflix catalog
+│   └── supermarket_Sales.csv                    # Raw Supermarket transaction data
+├── 23L_1021_A2.ipynb                            # Fully executed Jupyter Notebook
+├── 23L_1021_A2_netflix_cleaned_v1.0.csv         # Cleaned & feature-engineered Netflix CSV
+├── 23L_1021_A2_supermarket_cleaned_v1.0.csv     # Cleaned & feature-engineered Supermarket CSV
+├── writeup.pdf                                  # Formal summary report (2-4 pages)
+└── README.md                                    # Documentation and data dictionary
 
---------------------------------------------------------------------------------
-B2 & B3. DATA QUALITY & CLEANING SUMMARY TABLE
---------------------------------------------------------------------------------
-| Problem Identified        | Detection Evidence           | Decision Taken            | Analytical Justification                       |
-|---------------------------|------------------------------|---------------------------|------------------------------------------------|
-| Missing Values & Duplicates| df.isnull().sum() == 0;      | None required; preserved  | Dataset is 100% structurally complete and      |
-|                           | duplicated().sum() == 0      | all 1,000 records.        | contains zero key collision defects.          |
-| Invariant Static Column   | gross_margin_pct has single  | Dropped column from the   | Feature has zero variance (sigma^2 = 0);       |
-| (Zero Variance)           | unique value: 4.761905%      | active feature matrix.    | provides zero entropy and induces singularity. |
-| Perfect Multicollinearity | cogs, tax_5_pct, gross_income| Retained total as target;  | Variables are exact scalar multiples (r=1.00); |
-| in Accounting Ledger      | show r = 1.00 with total     | documented collinearity.  | keeping all four inflates VIF to infinity.     |
-| Unparsed Temporal Fields  | date and time stored as text | Parsed to datetime64;     | Enables extraction of cyclical features        |
-|                           | objects ('M/D/YYYY', 'HH:MM')| combined into timestamp.  | necessary for intraday and weekly analysis.    |
-| Missing Intraday Signals  | Schema lacked discrete       | Engineered hour, day_name,| Essential for testing bimodal shopping peaks   |
-|                           | operational shopping bins    | time_of_day, is_weekend.  | and day-of-week revenue variations (Q4).       |
-| Non-Standard Header Names | Mixed casing and characters  | Renamed all headers to    | Eliminates property access syntax errors and   |
-|                           | ('Tax 5%', 'Customer...')    | clean snake_case.         | standardizes schema for Assignment 3.          |
-| High-Spend Outliers       | 9 rows exceed Q3 + 1.5*IQR   | Retained all 9 outliers   | Baskets represent valid high-unit/high-price   |
-| in Total ($991.74+)       | in total and cogs            | unaltered.                | transactions; deletion distorts branch sales.  |
+```
 
-Cleaned output exported as: 23L_1021_A2_supermarket_cleaned_v1.0.csv (1,000 rows, 25 columns).
+---
 
---------------------------------------------------------------------------------
-B8. SUPERMARKET SALES INSIGHTS & INTERPRETATIONS
---------------------------------------------------------------------------------
-1. Decoupling of Product Line Revenue from Basket Size:
-   - Observation: 'Food and beverages' generated the highest cumulative revenue 
-     ($56,144.84 across 174 transactions), yet ranked 4th in average basket spend 
-     ($322.67). Conversely, 'Home and lifestyle' ranked 5th in total revenue 
-     ($53,861.91) but ranked 1st in average basket spend ($336.64).
-   - Interpretation: High revenue in consumables is foot-traffic and volume-driven, 
-     whereas home furnishing sales rely on higher per-ticket monetary expenditure.
-   - Speculation: Supermarkets serve as frequent grocery stops for daily essentials, 
-     while home goods purchases represent deliberate, periodic high-ticket visits.
+## Part A: Netflix Movies and TV Shows EDA
 
-2. Exact Multicollinearity Across Point-of-Sale Accounting Measures:
-   - Observation: cogs, tax_5_pct, total, and gross_income exhibit mutual pairwise 
-     Pearson correlations of r = 1.00. Tax 5% and Gross income are identical down 
-     to the 4th decimal place across all 1,000 records (passing np.isclose with 0 residuals).
-   - Interpretation: The financial metrics are deterministic linear scalings of 
-     COGS (Unit Price x Quantity). Gross margin percentage is mathematically fixed 
-     at (1/21)*100 = 4.761905%, contributing zero statistical information.
-   - Speculation: The store records accounting line-items through automated register 
-     scripts rather than real-time product-specific cost accounting.
+### A1. Dataset Overview & Unit of Observation
 
-3. Geographic and Performance Uniformity Across Branches:
-   - Observation: Total revenue across branches differed by less than 4.1% ($106,200 
-     in Yangon vs. $110,569 in Naypyitaw). One-way ANOVA tests showed no significant 
-     difference in sales (F=0.885, p=0.413), quantities (F=0.151, p=0.860), or 
-     ratings (F=2.076, p=0.126). Between-branch mean difference ($24.75) accounted 
-     for only 10.1% of within-branch standard deviation ($246.10).
-   - Interpretation: Retail performance is homogeneous across geographic territories; 
-     branch location does not explain individual transaction variance.
-   - Speculation: Standardized chain-wide store layouts, identical inventory catalogs, 
-     and uniform pricing models produce homogeneous customer behaviors across cities.
+* **Unit of Observation:** A single media title cataloged on Netflix globally through mid-2021[cite: 2].
+* **Scope:** 8,807 unique video assets across two distinct media classes: standalone feature films (`Movie`) and episodic television bundles (`TV Show`)[cite: 2].
 
-4. Loyalty Membership Fails to Drive Basket Expansion:
-   - Observation: Registered Members averaged $327.79 per transaction versus $318.12 
-     for Normal walk-in customers (Welch's t = 0.6215, p = 0.5344; Mann-Whitney 
-     U p = 0.5912). Mean item quantity was virtually identical (5.56 vs. 5.46 units).
-   - Interpretation: The customer loyalty card program functions as an identification 
-     mechanism rather than a value driver that stimulates greater basket expenditure.
-   - Speculation: The membership scheme may lack tiered financial incentives, 
-     exclusive member discounts, or gamified thresholds needed to alter buyer habits.
+### A2 & A3. Data Quality Audit & Cleaning Decisions
 
-5. Customer Satisfaction Decoupled from Transaction Variables:
-   - Observation: Customer satisfaction ratings correlate negligibly with unit price 
-     (r = -0.0088, p = 0.782), quantity (r = -0.0158, p = 0.617), and total spend 
-     (r = -0.0364, p = 0.250). Ratings showed no significant variation across product 
-     lines (ANOVA F = 0.540, p = 0.746) or store branches (ANOVA F = 2.076, p = 0.126).
-   - Interpretation: Point-of-sale spending economics do not explain customer sentiment. 
-   - Speculation: Customer ratings reflect unmeasured service variables (cashier speed, 
-     staff courtesy, wait times, cleanliness) or uniform survey acquiescence bias.
+| Defect / Problem | Detection Evidence | Decision Taken | Analytical Justification |
+| --- | --- | --- | --- |
+| **Schema Shift / Misalignment** | 3 rows contained duration strings in the `rating` column (`'74 min'`, `'84 min'`, `'66 min'`) for Louis C.K. stand-up titles[cite: 3]. | Shifted duration values to `duration`; imputed `rating` as `'Unavailable'`. | Eliminates invalid maturity classes and restores duration parsing without dropping valid rows. |
+| **Missing Categorical / Text Values** | High null counts: `director` (2,634 nulls), `country` (831 nulls), `cast` (825 nulls)[cite: 3]. | Imputed explicit category string `'Unknown'`. | Retains over 30% of the dataset; prevents artificial skew from listwise row deletion. |
+| **Missing Maturity Ratings** | 4 rows with null `rating` post-realignment[cite: 3]. | Imputed `'Unavailable'`. | Prevents data loss for otherwise complete media records. |
+| **Missing Ingestion Dates** | 10 titles missing `date_added`[cite: 3]. | Imputed median addition date conditional on release year cohort. | Retains records; negligible distortion on multi-year macro catalog trends. |
+| **Unparsed Temporal Strings** | `date_added` stored as text objects (e.g., `'September 9, 2021'`). | Converted to `datetime64[ns]`; extracted `year_added` and `month_added`. | Enables temporal windowing, chronological ordering, and ingestion lag analysis[cite: 3]. |
+| **Composite Duration Field** | `duration` held mixed metrics: minutes for Movies, season counts for TV Shows[cite: 3]. | Parsed into `duration_int` (integer) and `duration_unit` (`min` vs. `Season`). | Separates discrete multi-season series from continuous movie runtimes[cite: 3]. |
+| **Delimited Multi-Valued Attributes** | `country` and `listed_in` contained multi-entity comma-separated strings[cite: 3]. | Maintained primary strings; extracted `country_count` and `genre_count`[cite: 3]. | Quantifies international co-production scale and genre complexity without artificial row explosion. |
 
-================================================================================
+### A8. Core Insights & Analytical Findings
+
+1. **Catalog Dominance and Episodic Expansion**
+* **Observation:** Feature films comprise 69.62% of the historical catalog (6,131 titles) versus 30.38% for TV Shows (2,676 titles). However, the TV Show share of annual additions increased from 19.8% in 2015 to 35.4% in 2020.
+* **Interpretation:** Netflix originated as a movie licensing repository but pivoted toward episodic series to boost subscriber retention and lifetime platform engagement.
+* *Speculation:* Episodic content encourages sustained weekly viewership, mitigating monthly subscription cancellation rates more effectively than standalone films.
+
+
+2. **Ingestion Lag Compression (Day-and-Date Transition)**
+* **Observation:** The median lag between theatrical release and platform addition collapsed from 4.0 years (pre-2015 titles) to 0.0 years (same-year release) during 2018–2021, with 58.4% of post-2018 additions arriving within 12 months of release.
+* **Interpretation:** Netflix transitioned away from long-tail syndication toward proprietary Netflix Originals and day-and-date global premieres.
+*Speculation:* Legacy Hollywood studios withholding intellectual property for their own streaming platforms (e.g., Disney+, HBO Max) accelerated Netflix's direct commissioning.
+
+
+3. **Regional Production Hub Specialization**
+* **Observation:** The United States leads catalog volume (3,690 titles), followed by India (1,046) and the United Kingdom (806). In India, 54.2% of all titles fall under *Dramas* and *International Movies*, whereas US output is balanced across *Comedies* (28.4%), *Documentaries* (21.3%), and *Action* (18.1%).
+* **Interpretation:** Regional catalog profiles reflect domestic production strengths—India's catalog is driven by feature film productions, while Anglo-American markets feature broader diversification across unscripted and documentary formats.
+*Speculation:* International content quotas and regional subscriber viewing habits heavily dictate customized commissioning budgets.
+
+
+4. **Bimodal Maturity Concentration**
+* **Observation:** Mature content dominates: `TV-MA` (3,207 titles; 36.4%) and `TV-14` (2,160 titles; 24.5%) together represent 60.9% of the catalog. Family-oriented classifications (`TV-Y`, `TV-G`, `G`) account for less than 11.5%.
+* **Interpretation:** Netflix positions itself primarily toward adult and adolescent demographics rather than functioning as a dedicated family or children's network.
+*Speculation:* Household purchasing authority rests with adults, driving content budgets toward prestige adult drama.
+
+
+5. **Episodic Lifespan Bottlenecks**
+* **Observation:** Movie running times follow a bell-shaped distribution centered at $\mu = 99.58$ minutes ($\text{Median} = 98.0$ min, $\text{IQR} = 26.0$ min). TV Shows exhibit an extreme right-skew: 67.0% terminate after Season 1, 83.8% conclude by Season 2, and fewer than 2.4% reach 5 or more seasons.
+* **Interpretation:** Films adhere strictly to global theatrical standards (90–120 minutes). In contrast, episodic series face steep algorithmic renewal hurdles, with cancellations common after early seasons if engagement targets are missed.
+*Speculation:* Escalating production contracts and diminishing returns on subscriber acquisition past Season 2 disincentivize long-running series.
+
+
+
+---
+
+## Part B: Supermarket Sales EDA
+
+### B1. Dataset Overview & Unit of Observation
+
+* **Unit of Observation:** A single point-of-sale (POS) checkout transaction completed at one of three retail branches across Myanmar (Yangon, Naypyitaw, Mandalay) between January 1, 2019, and March 30, 2019[cite: 2].
+* **Scope:** 1,000 distinct retail transaction invoices capturing store location, merchandise department, pricing, quantities, payment tender, and customer satisfaction[cite: 2].
+
+### B2 & B3. Data Quality Audit & Cleaning Decisions
+
+| Defect / Problem | Detection Evidence | Decision Taken | Analytical Justification |
+| --- | --- | --- | --- |
+| **Missing Values & Duplicates** | Evaluated via `df.isnull().sum()` ($0$) and `df.duplicated().sum()` ($0$). | Preserved all 1,000 transaction records. | Dataset is 100% structurally complete with zero primary key collisions. |
+| **Zero-Variance Feature** | `Gross margin percentage` contained a single constant value ($4.761905\%$) across all rows ($\sigma^2 = 0$). | Dropped column from active feature set. | Static constants carry zero entropy and cause rank deficiency or singular matrices in linear models. |
+| **Collinear Accounting Measures** | `Cost of goods sold`, `Tax 5%`, `Gross income`, and `Total` show mutual correlations of $r = 1.00$. | Retained `total` as primary target; documented dependencies. | Identical linear combinations inflate the Variance Inflation Factor ($\text{VIF} \to \infty$) if used together. |
+| **Unparsed Datetime Objects** | `Date` and `Time` stored as raw strings (`M/D/YYYY` and `HH:MM`). | Parsed to native `datetime64[ns]`; created unified `timestamp`. | Enables temporal windowing and chronological analysis[cite: 5]. |
+| **Lack of Temporal Granularity** | Raw schema lacked discrete intraday or day-of-week indicators. | Engineered `hour`, `day_of_week`, `day_name`, `time_of_day`, and `is_weekend`. | Allows isolation of peak trading windows, day-of-week trends, and diurnal cycles[cite: 5, 6]. |
+| **Non-Standard Header Names** | Headers contained spaces, mixed casing, and special characters (`Tax 5%`). | Normalized all headers to Python `snake_case`. | Prevents syntax errors during dot-notation property access and standardizes pipelines. |
+| **High Financial Values (Outliers)** | 9 records exceeded Tukey's upper fence in `total` and `cogs` ($> \$991.74$). | **Retained all 9 outliers unaltered.** | Outliers stem from high-unit ($9\text{--}10$) and high-price ($\ge \$90$) purchases. Deleting valid sales would distort revenue totals[cite: 5]. |
+
+### B8. Core Insights & Analytical Findings
+
+1. **Decoupling of Departmental Volume from Basket Size**
+* **Observation:** *Food and beverages* generated the highest cumulative revenue ($56,144.84 across 174 transactions), yet ranked 4th in average basket spend ($322.67). Conversely, *Home and lifestyle* ranked 5th in total revenue ($53,861.91) but ranked 1st in average basket spend ($336.64).
+* **Interpretation:** Fast-moving consumer goods drive gross chain revenue through foot traffic and visit frequency, whereas durable home goods rely on larger individual basket values.
+*Speculation:* Supermarkets serve as high-frequency stops for daily perishables, while household goods purchases represent planned, higher-expenditure visits.
+
+
+2. **Multicollinearity Across Point-of-Sale Metrics**
+* **Observation:** `cogs`, `tax_5_pct`, `total`, and `gross_income` exhibit pairwise Pearson correlations of $r = 1.00$. `Tax 5%` and `Gross income` are identical down to the fourth decimal place across all 1,000 records.
+* **Interpretation:** The financial fields represent deterministic linear rescalings of $\text{COGS} = \text{Unit Price} \times \text{Quantity}$. Gross margin is mathematically fixed at $(1/21) \times 100 \approx 4.761905\%$, providing zero independent statistical information.
+*Speculation:* Accounting metrics are computed via register software scripts rather than tracking product-specific margin differences.
+
+
+3. **Branch Performance and Geographic Uniformity**
+* **Observation:** Cumulative revenue across branches varied by less than 4.1% ($106,200 in Yangon vs. $110,569 in Naypyitaw). One-way ANOVA tests confirmed no significant differences in sales ($F = 0.885, p = 0.413$), quantities ($F = 0.151, p = 0.860$), or customer ratings ($F = 2.076, p = 0.126$). Between-branch mean difference ($24.75) accounts for only 10.1% of within-branch standard deviation ($246.10).
+* **Interpretation:** Retail performance is homogeneous across urban centers; physical branch location does not explain individual transaction variance.
+*Speculation:* Standardized chain-wide store layouts, identical inventories, and centralized pricing enforce uniform purchasing behaviors across cities.
+
+
+4. **Loyalty Membership Impact on Basket Size**
+* **Observation:** Registered Members averaged $327.79 per visit compared to $318.12 for non-member walk-ins (Welch's $t = 0.6215, p = 0.5344$; Mann-Whitney $U = 127453.0, p = 0.5912$). Mean basket item quantities were nearly identical (5.56 vs. 5.46 units).
+* **Interpretation:** The loyalty membership program functions primarily as an identifier rather than an incentive system that drives larger basket values.
+*Speculation:* The program may lack compelling financial rewards (such as tiered volume discounts or cash-back rebates) necessary to alter shopper spending thresholds.
+
+
+5. **Customer Satisfaction Ratings Independence**
+* **Observation:** Customer satisfaction ratings correlate negligibly with unit price ($r = -0.0088, p = 0.782$), quantity ($r = -0.0158, p = 0.617$), and total spend ($r = -0.0364, p = 0.250$). Ratings also show no significant differences across product lines (ANOVA $p = 0.746$) or store branches (ANOVA $p = 0.126$).
+* **Interpretation:** Point-of-sale transactional metrics do not explain customer satisfaction.
+*Speculation:* Customer ratings reflect unmeasured service variables (cashier speed, staff courtesy, wait times, cleanliness) or uniform survey acquiescence bias.
+
+
+
+---
+
+## 🚀 Setup & Execution Guide
+
+### 1. Environment Configuration
+
+Clone the repository and set up a Python virtual environment:
+
+```bash
+# Clone the repository
+git clone https://github.com/muhammadwaqarsaleem/ds_eda-data_cleaning.git
+cd ds_eda-data_cleaning
+
+# Create and activate virtual environment
+python -m venv ds_env
+source ds_env/bin/activate  # On Windows: ds_env\Scripts\activate
+
+# Install strictly allowed course dependencies
+pip install --upgrade pip
+pip install pandas numpy matplotlib seaborn scipy statsmodels jupyter
+
+```
+
+### 2. Running the Analysis
+
+Launch the Jupyter notebook environment:
+
+```bash
+jupyter notebook 23L_1021_A2.ipynb
+
+```
+
+Execute cells sequentially from top to bottom[cite: 1]. The notebook is partitioned into:
+
+* **Cells 01–37:** Part A — Netflix Catalog EDA (A1 through A8)[cite: 3, 4]
+* **Cells 38–70:** Part B — Supermarket Sales EDA (B1 through B8)[cite: 4, 5, 6]
+
+---
+
+## 📋 Course Compliance & Academic Integrity
+
+* **Prohibited Libraries:** Automated EDA toolkits (e.g., `ydata-profiling`, `Sweetviz`, `AutoViz`) were strictly excluded in accordance with course guidelines[cite: 1]. All analytical transformations and visual encodings were constructed manually using `pandas`, `numpy`, `matplotlib`, `seaborn`, `scipy`, and `statsmodels`[cite: 1].
+* **AI Disclosure:** Consulted Google Gemini as an analytical thought partner for statistical validation, visualization formatting, and rubric alignment[cite: 2]. All code execution, data cleaning logic, and written interpretations were independently conducted, verified, and audited[cite: 2].
+* **License:** Distributed under the MIT License for educational and non-commercial academic research.
